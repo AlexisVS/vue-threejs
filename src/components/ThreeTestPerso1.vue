@@ -28,7 +28,7 @@ const initCanvas = () => {
 
 // 1. Create renderer
 const createRenderer = () => {
-  renderer = new THREE.WebGLRenderer({ canvas: canvas.value });
+  renderer = new THREE.WebGLRenderer({ canvas: canvas.value, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
@@ -60,7 +60,7 @@ const createGeometry = () => {
 // 5. Create material
 const createMaterial = () => {
   const color = new THREE.Color(0xff0000);
-  material = new THREE.MeshBasicMaterial({ color: color });
+  material = new THREE.MeshToonMaterial({ color: color });
 }
 
 // 6. Create mesh
