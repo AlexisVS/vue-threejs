@@ -5,7 +5,7 @@
 <script setup>
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, useCssVars } from 'vue';
 
 
 // 0. Define variable
@@ -19,13 +19,18 @@ let canvas = ref(null),
   sphereMesh2,
   light,
   controls,
-  earth,
-  moon,
-  sun,
   solarSystem,
+  sun,
   mercury,
   venus,
-  earthSystem,
+  earth,
+  moon,
+  mars,
+  jupiter,
+  uranus,
+  saturne,
+  neptune,
+
   textureLoader = new THREE.TextureLoader()
 
 
@@ -38,15 +43,16 @@ const initCanvas = () => {
 // 1. Create renderer
 const createRenderer = () => {
   renderer = new THREE.WebGLRenderer({ canvas: canvas.value, antialias: true, alpha: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 // 2. Create scene
 const createScene = () => {
   scene = new THREE.Scene()
-  // textureLoader.load('https://data.1freewallpapers.com/detail/stars-space-black-darkness.jpg', function (texture) {
-  //   scene.background = texture;
-  // });
+  textureLoader.load('/public/textures/8k_stars.jpg', function (texture) {
+    scene.background = texture;
+  });
 }
 
 // 2.5 Add Helper
@@ -61,7 +67,7 @@ const createCamera = () => {
   const near = 0.1;
   const far = 1000;
   camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(0, 5, 0);
+  camera.position.set(0, 13, 0);
   // camera.updateMatrix()
   scene.add(camera);
 }
@@ -76,6 +82,8 @@ const createCamera = () => {
  * Width of the sphere
  * @param heightSegment
  * Height of the sphere
+ * @param texture
+ * path of the texture
  * @param x
  * Position x of sphere
  * @param y
@@ -84,13 +92,36 @@ const createCamera = () => {
  * position z of sphere
  * @return THREE.Mesh
  */
-const makeSphere = (radius, widthSegments, heightSegments, x, y, z) => {
+const makeSphere = (radius, widthSegments, heightSegments, x, y, z, texture) => {
+  // Define geometry
   const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+
+  // Self center the object
   geometry.center();
-  const mesh = new THREE.Mesh(geometry, material);
+
+  //Define material
+  let sphereMaterial;
+
+  // Define texture define material
+  if (texture != null) {
+    const sphereTexture = new THREE.TextureLoader().load(texture);
+    sphereMaterial = new THREE.MeshBasicMaterial({ map: sphereTexture });
+  } else {
+    sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  }
+
+  // Define mesh
+  const mesh = new THREE.Mesh(geometry, sphereMaterial);
+
+  // Set position
   mesh.position.set(y, x, z)
+
+  // Define Object3D for movement
   const object = new THREE.Object3D();
+
+  // Add mesh to Object3D
   object.add(mesh)
+
   return { object, mesh };
 }
 
@@ -141,47 +172,105 @@ const initSolarSystem = () => {
   initMercury();
   initVenus();
   initEarthSystem();
+  initMars();
+  initJupiter();
+  initSaturne();
+  initUranus();
+  initNeptune();
   scene.add(solarSystem);
 }
 
 const initSun = () => {
-  sun = makeSphere(1, 64, 32, 0, 0, 0);
+  sun = makeSphere(1, 64, 32, 0, 0, 0, '/public/textures/8k_sun.jpg');
   solarSystem.add(sun.object);
 }
 
 const initMercury = () => {
-  mercury = makeSphere(1 / 22.7, 64, 32, 0, 1.6, 0)
+  mercury = makeSphere(1 / 22.7, 64, 32, 0, 1.4, 0, '/public/textures/8k_mercury.jpg')
   solarSystem.add(mercury.object);
 }
 const initVenus = () => {
-  venus = makeSphere(1 / 11.3, 64, 32, 0, 2.2, 0)
+  venus = makeSphere(1 / 11.3, 64, 32, 0, 1.7, 0, '/public/textures/4k_venus_atmosphere.jpg')
   solarSystem.add(venus.object);
 }
 
 const initEarthSystem = () => {
-  // earthSystem = new THREE.Group();
-  earth = makeSphere(1 / 10.8, 64, 32, 0, 2.8, 0);
-  moon = makeSphere(1 / 80, 64, 32, 0, 0.15, 0)
+  earth = makeSphere(1 / 10.8, 64, 32, 0, 2, 0, '/public/textures/8k_earth_daymap.jpg');
+  moon = makeSphere(1 / 80, 64, 32, 0, 0.15, 0, '/public/textures/8k_moon.jpg')
   earth.mesh.add(moon.object);
-  // earthSystem.add(earth);
   solarSystem.add(earth.object)
 }
 
+const initMars = () => {
+  mars = makeSphere(1 / 20.8, 64, 32, 0, 2.5, 0, '/public/textures/8k_mars.jpg')
+  solarSystem.add(mars.object);
+};
+
+const initJupiter = () => {
+  jupiter = makeSphere(1 / 0.97, 64, 32, 0, 6.2, 0, '/public/textures/8k_jupiter.jpg')
+  solarSystem.add(jupiter.object);
+}
+
+const initSaturne = () => {
+  saturne = makeSphere(1 / 1.14, 64, 32, 0, 10.6, 0, '/public/textures/8k_saturn.jpg')
+
+  // Add ring
+  const geometry = new THREE.RingBufferGeometry(1 / 1.14, 1 / 1.14 + 0.85, 256);
+  var pos = geometry.attributes.position;
+  var v3 = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v3.fromBufferAttribute(pos, i);
+    geometry.attributes.uv.setXY(i, v3.length() < 1.5 ? 0 : 1, 1);
+  }
+  let texture = new THREE.TextureLoader().load('/public/textures/8k_saturn_ring_alpha.png');
+  texture.flipY = false;
+
+  const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
+  const ring = new THREE.Mesh(geometry, material);
+  geometry.center
+  ring.rotation.x = 1.57;
+  saturne.mesh.add(ring)
+
+  solarSystem.add(saturne.object);
+};
+
+const initUranus = () => {
+  uranus = makeSphere(1 / 20.8, 64, 32, 0, 20.2, 0, '/public/textures/2k_uranus.jpg')
+  solarSystem.add(uranus.object);
+};
+
+const initNeptune = () => {
+  neptune = makeSphere(1 / 2.77, 64, 32, 0, 31.1, 0, '/public/textures/2k_neptune.jpg')
+  solarSystem.add(neptune.object);
+};
+
+
 const animate = () => {
-  solarSystem.rotateY(0.00001);
-  // earthSystem.rotateY(1 * Math.PI);
-  sun.object.rotateY(0.004 * Math.PI);
-  mercury.object.rotateY(0.004);
-  venus.object.rotateY(0.003);
-  earth.object.rotateY(0.001);
-  moon.object.rotateY(0.0004);
+  // Global object
+  solarSystem.rotateY(0.001);
 
+  // Object3D
+  sun.object.rotateY(0.0001);
+  mercury.object.rotateY(0.01);
+  venus.object.rotateY(0.00391);
+  earth.object.rotateY(0.0024109);
+  moon.object.rotateY(0.004);
+  mars.object.rotateY(0.0012827988);
+  jupiter.object.rotateY(0.00020323325);
+  saturne.object.rotateY(0.00008184523809);
+  uranus.object.rotateY(0.000002870189171);
+  neptune.object.rotateY(0.00000146325241104);
 
-  mercury.mesh.rotateY(1);
-  venus.mesh.rotateY(1.1);
+  // Mesh
+  mercury.mesh.rotateY(0.01);
+  venus.mesh.rotateY(0.01);
   earth.mesh.rotateY(0.01);
-  moon.mesh.rotateY(0.014);
-
+  moon.mesh.rotateY(0.14);
+  mars.mesh.rotateY(0.004);
+  jupiter.mesh.rotateY(0.004);
+  saturne.mesh.rotateY(0.004);
+  uranus.mesh.rotateY(0.004);
+  neptune.mesh.rotateY(0.004);
 
   renderer.render(scene, camera);
 };
@@ -211,12 +300,6 @@ onMounted(() => {
 </script>
 
 <style>
-
-body {
-  background: url('../assets/stars-space-black-darkness.jpg');
-  background-size: cover;
-  background-repeat: no-repeat;
-}
 #canvas {
   width: 100%;
 }
