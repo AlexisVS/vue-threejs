@@ -289,7 +289,6 @@ onMounted(() => {
   addHelper();
   createCamera();
   createMaterial();
-  // createSphereMesh();
   createLight();
   createControls();
   initSolarSystem();
