@@ -17,7 +17,7 @@ let canvas = ref(null),
   material,
   sphereMesh,
   sphereMesh2,
-  light,
+  sunLight = [],
   controls,
   solarSystem,
   sun,
@@ -30,9 +30,21 @@ let canvas = ref(null),
   uranus,
   saturne,
   neptune,
-
   textureLoader = new THREE.TextureLoader()
 
+// 0 init
+const init = () => {
+  initCanvas();
+  createRenderer();
+  createScene();
+  addHelper();
+  createCamera();
+  createLight();
+  createControls();
+  initSolarSystem();
+  animate();
+  renderer.setAnimationLoop(animate);
+}
 
 // 1. Target canvas element or create canvas element 
 const initCanvas = () => {
@@ -45,6 +57,8 @@ const createRenderer = () => {
   renderer = new THREE.WebGLRenderer({ canvas: canvas.value, antialias: true, alpha: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  // renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 }
 
 // 2. Create scene
@@ -53,6 +67,8 @@ const createScene = () => {
   textureLoader.load('/public/textures/8k_stars.jpg', function (texture) {
     scene.background = texture;
   });
+  scene.castShadow = true;
+  scene.receiveShadow = true;
 }
 
 // 2.5 Add Helper
@@ -69,7 +85,10 @@ const createCamera = () => {
   camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.set(0, 13, 0);
   // camera.updateMatrix()
+
   scene.add(camera);
+
+
 }
 
 // 3.1 make sphere
@@ -92,7 +111,7 @@ const createCamera = () => {
  * position z of sphere
  * @return THREE.Mesh
  */
-const makeSphere = (radius, widthSegments, heightSegments, x, y, z, texture) => {
+const makeSphere = (radius, widthSegments, heightSegments, x, y, z, texture, sun) => {
   // Define geometry
   const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
 
@@ -105,9 +124,17 @@ const makeSphere = (radius, widthSegments, heightSegments, x, y, z, texture) => 
   // Define texture define material
   if (texture != null) {
     const sphereTexture = new THREE.TextureLoader().load(texture);
-    sphereMaterial = new THREE.MeshBasicMaterial({ map: sphereTexture });
+    if (sun == true) {
+      sphereMaterial = new THREE.MeshBasicMaterial({ map: sphereTexture });
+    } else {
+      sphereMaterial = new THREE.MeshStandardMaterial({ map: sphereTexture });
+    }
   } else {
-    sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    if (sun == true) {
+      sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    } else {
+      sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    }
   }
 
   // Define mesh
@@ -122,43 +149,63 @@ const makeSphere = (radius, widthSegments, heightSegments, x, y, z, texture) => 
   // Add mesh to Object3D
   object.add(mesh)
 
+  // add shadow
+  mesh.castShadow = true; //default is false
+  mesh.receiveShadow = true; //default
+  object.castShadow = true; //default is false
+  object.receiveShadow = true; //default
+
   return { object, mesh };
 }
 
 // 4. Create sphere geometry
 
-const createGeometry = () => {
-  const radius = 1;
-  const widthSegments = 64;
-  const heightSegments = 32;
-  sphereGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-}
+// const createGeometry = () => {
+//   const radius = 1;
+//   const widthSegments = 64;
+//   const heightSegments = 32;
+//   sphereGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+// }
 
-// 5. Create material
-const createMaterial = () => {
-  const color = new THREE.Color(0xff0000);
-  material = new THREE.MeshToonMaterial({ color: color });
-}
+// // 5. Create material
+// const createMaterial = () => {
+//   const color = new THREE.Color(0xff0000);
+//   material = new THREE.MeshToonMaterial({ color: color });
+// }
 
-// 6. Create mesh
-const createSphereMesh = () => {
-  sphereMesh = new THREE.Mesh(sphereGeometry, material);
-  sphereMesh.position.set(0, 0, 0);
-  scene.add(sphereMesh);
+// // 6. Create mesh
+// const createSphereMesh = () => {
+//   sphereMesh = new THREE.Mesh(sphereGeometry, material);
+//   sphereMesh.position.set(0, 0, 0);
+//   scene.add(sphereMesh);
 
-  sphereMesh2 = new THREE.Mesh(sphereGeometry, material)
-  sphereMesh2.position.set(2.1, 0, 0);
-  scene.add(sphereMesh2);
-}
+//   sphereMesh2 = new THREE.Mesh(sphereGeometry, material)
+//   sphereMesh2.position.set(2.1, 0, 0);
+//   scene.add(sphereMesh2);
+// }
 
 // 7. Create light
 const createLight = () => {
-  const hex = 0xffff00;
-  const intensity = 10;
-  const distance = 10;
+  const hex = 0xffffff;
+  const intensity = 1;
+  const distance = 0;
   const decay = 10;
-  light = new THREE.PointLight(hex, intensity, distance, decay);
+
+  let light = new THREE.PointLight(hex, intensity, distance);
+
+  //shadow
+  light.castShadow = true;
+  light.shadow.mapSize.width = 512; // default
+  light.shadow.mapSize.height = 512; // default
+  light.shadow.camera.near = 0.1; // default
+  light.shadow.camera.far = 500; // default
+
   scene.add(light);
+  sunLight.push(...sunLight, light);
+  light = undefined;
+
+  scene.add(new THREE.CameraHelper(camera))
+
 }
 
 const createControls = () => {
@@ -168,6 +215,8 @@ const createControls = () => {
 
 const initSolarSystem = () => {
   solarSystem = new THREE.Group()
+  solarSystem.castShadow = true;
+  solarSystem.receiveShadow = true;
   initSun();
   initMercury();
   initVenus();
@@ -181,7 +230,8 @@ const initSolarSystem = () => {
 }
 
 const initSun = () => {
-  sun = makeSphere(1, 64, 32, 0, 0, 0, '/public/textures/8k_sun.jpg');
+  sun = makeSphere(1, 64, 32, 0, 0, 0, '/public/textures/8k_sun.jpg', true);
+  sun.mesh.castShadow = false;
   solarSystem.add(sun.object);
 }
 
@@ -229,6 +279,8 @@ const initSaturne = () => {
   const ring = new THREE.Mesh(geometry, material);
   geometry.center
   ring.rotation.x = 1.57;
+  ring.receiveShadow = true;
+  ring.castShadow = true;
   saturne.mesh.add(ring)
 
   solarSystem.add(saturne.object);
@@ -272,6 +324,8 @@ const animate = () => {
   uranus.mesh.rotateY(0.004);
   neptune.mesh.rotateY(0.004);
 
+  camera.updateProjectionMatrix();
+
   renderer.render(scene, camera);
 };
 
@@ -283,17 +337,7 @@ window.addEventListener('resize', function () {
 });
 
 onMounted(() => {
-  initCanvas();
-  createRenderer();
-  createScene();
-  addHelper();
-  createCamera();
-  createMaterial();
-  createLight();
-  createControls();
-  initSolarSystem();
-  animate();
-  renderer.setAnimationLoop(animate);
+  init();
 });
 
 </script>
