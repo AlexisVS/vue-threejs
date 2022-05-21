@@ -87,8 +87,6 @@ const createCamera = () => {
   // camera.updateMatrix()
 
   scene.add(camera);
-
-
 }
 
 // 3.1 make sphere
