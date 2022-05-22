@@ -8,7 +8,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { onMounted, ref, useCssVars } from 'vue';
 
 
-// 0. Define variables
+// 0. Define variable
 let canvas = ref(null),
   renderer = new THREE.WebGLRenderer,
   scene = new THREE.Scene,
