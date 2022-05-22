@@ -11,6 +11,7 @@ import { RouterLink, RouterView } from 'vue-router'
 /* GENERAl STYLE */
 body {
   margin: 0;
-  background-color: #777;
+  background-color: black;
+  overflow-y: hidden;
 }
 </style>
