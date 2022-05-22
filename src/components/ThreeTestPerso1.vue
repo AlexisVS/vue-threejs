@@ -64,7 +64,7 @@ const createRenderer = () => {
 // 2. Create scene
 const createScene = () => {
   scene = new THREE.Scene()
-  textureLoader.load('/public/textures/8k_stars.jpg', function (texture) {
+  textureLoader.load('/vue-threejs/public/textures/8k_stars.jpg', function (texture) {
     scene.background = texture;
   });
   scene.castShadow = true;
@@ -228,39 +228,39 @@ const initSolarSystem = () => {
 }
 
 const initSun = () => {
-  sun = makeSphere(1, 64, 32, 0, 0, 0, '/public/textures/8k_sun.jpg', true);
+  sun = makeSphere(1, 64, 32, 0, 0, 0, '/vue-threejs/public/textures/8k_sun.jpg', true);
   sun.mesh.castShadow = false;
   solarSystem.add(sun.object);
 }
 
 const initMercury = () => {
-  mercury = makeSphere(1 / 22.7, 64, 32, 0, 1.4, 0, '/public/textures/8k_mercury.jpg')
+  mercury = makeSphere(1 / 22.7, 64, 32, 0, 1.4, 0, '/vue-threejs/public/textures/8k_mercury.jpg')
   solarSystem.add(mercury.object);
 }
 const initVenus = () => {
-  venus = makeSphere(1 / 11.3, 64, 32, 0, 1.7, 0, '/public/textures/4k_venus_atmosphere.jpg')
+  venus = makeSphere(1 / 11.3, 64, 32, 0, 1.7, 0, '/vue-threejs/public/textures/4k_venus_atmosphere.jpg')
   solarSystem.add(venus.object);
 }
 
 const initEarthSystem = () => {
-  earth = makeSphere(1 / 10.8, 64, 32, 0, 2, 0, '/public/textures/8k_earth_daymap.jpg');
-  moon = makeSphere(1 / 80, 64, 32, 0, 0.15, 0, '/public/textures/8k_moon.jpg')
+  earth = makeSphere(1 / 10.8, 64, 32, 0, 2, 0, '/vue-threejs/public/textures/8k_earth_daymap.jpg');
+  moon = makeSphere(1 / 80, 64, 32, 0, 0.15, 0, '/vue-threejs/public/textures/8k_moon.jpg')
   earth.mesh.add(moon.object);
   solarSystem.add(earth.object)
 }
 
 const initMars = () => {
-  mars = makeSphere(1 / 20.8, 64, 32, 0, 2.5, 0, '/public/textures/8k_mars.jpg')
+  mars = makeSphere(1 / 20.8, 64, 32, 0, 2.5, 0, '/vue-threejs/public/textures/8k_mars.jpg')
   solarSystem.add(mars.object);
 };
 
 const initJupiter = () => {
-  jupiter = makeSphere(1 / 0.97, 64, 32, 0, 6.2, 0, '/public/textures/8k_jupiter.jpg')
+  jupiter = makeSphere(1 / 0.97, 64, 32, 0, 6.2, 0, '/vue-threejs/public/textures/8k_jupiter.jpg')
   solarSystem.add(jupiter.object);
 }
 
 const initSaturne = () => {
-  saturne = makeSphere(1 / 1.14, 64, 32, 0, 10.6, 0, '/public/textures/8k_saturn.jpg')
+  saturne = makeSphere(1 / 1.14, 64, 32, 0, 10.6, 0, '/vue-threejs/public/textures/8k_saturn.jpg')
 
   // Add ring
   const geometry = new THREE.RingBufferGeometry(1 / 1.14, 1 / 1.14 + 0.85, 256);
@@ -270,7 +270,7 @@ const initSaturne = () => {
     v3.fromBufferAttribute(pos, i);
     geometry.attributes.uv.setXY(i, v3.length() < 1.5 ? 0 : 1, 1);
   }
-  let texture = new THREE.TextureLoader().load('/public/textures/8k_saturn_ring_alpha.png');
+  let texture = new THREE.TextureLoader().load('/vue-threejs/public/textures/8k_saturn_ring_alpha.png');
   texture.flipY = false;
 
   const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
@@ -285,12 +285,12 @@ const initSaturne = () => {
 };
 
 const initUranus = () => {
-  uranus = makeSphere(1 / 20.8, 64, 32, 0, 20.2, 0, '/public/textures/2k_uranus.jpg')
+  uranus = makeSphere(1 / 20.8, 64, 32, 0, 20.2, 0, '/vue-threejs/public/textures/2k_uranus.jpg')
   solarSystem.add(uranus.object);
 };
 
 const initNeptune = () => {
-  neptune = makeSphere(1 / 2.77, 64, 32, 0, 31.1, 0, '/public/textures/2k_neptune.jpg')
+  neptune = makeSphere(1 / 2.77, 64, 32, 0, 31.1, 0, '/vue-threejs/public/textures/2k_neptune.jpg')
   solarSystem.add(neptune.object);
 };
 
