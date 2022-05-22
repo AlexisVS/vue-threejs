@@ -13,10 +13,6 @@ let canvas = ref(null),
   renderer = new THREE.WebGLRenderer,
   scene = new THREE.Scene,
   camera = new THREE.PerspectiveCamera,
-  sphereGeometry,
-  material,
-  sphereMesh,
-  sphereMesh2,
   sunLight = [],
   controls,
   solarSystem,
@@ -156,32 +152,6 @@ const makeSphere = (radius, widthSegments, heightSegments, x, y, z, texture, sun
   return { object, mesh };
 }
 
-// 4. Create sphere geometry
-
-// const createGeometry = () => {
-//   const radius = 1;
-//   const widthSegments = 64;
-//   const heightSegments = 32;
-//   sphereGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-// }
-
-// // 5. Create material
-// const createMaterial = () => {
-//   const color = new THREE.Color(0xff0000);
-//   material = new THREE.MeshToonMaterial({ color: color });
-// }
-
-// // 6. Create mesh
-// const createSphereMesh = () => {
-//   sphereMesh = new THREE.Mesh(sphereGeometry, material);
-//   sphereMesh.position.set(0, 0, 0);
-//   scene.add(sphereMesh);
-
-//   sphereMesh2 = new THREE.Mesh(sphereGeometry, material)
-//   sphereMesh2.position.set(2.1, 0, 0);
-//   scene.add(sphereMesh2);
-// }
-
 // 7. Create light
 const createLight = () => {
   const hex = 0xffffff;
@@ -200,10 +170,6 @@ const createLight = () => {
 
   scene.add(light);
   sunLight.push(...sunLight, light);
-  light = undefined;
-
-  scene.add(new THREE.CameraHelper(camera))
-
 }
 
 const createControls = () => {
